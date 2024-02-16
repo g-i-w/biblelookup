@@ -57,7 +57,7 @@ function loadSearch ( lang, id ) {
 					//for (const [verse, nothing] of Object.entries(verseObj)) {
 					for (i in verseObj) {
 						var verse = verseObj[i];
-						table += `<tr><td><a href="#bible-view-anchor" onclick="loadChapter('${book}','${chap}')\">${book}&nbsp;${chap}</a>:${verse}</td><td class="separator">` + buildVerse( book, chap, verse ) + '</td></tr>';
+						table += `<tr><td><a href="#chapter" onclick="loadChapter('${book}','${chap}')\">${book}&nbsp;${chap}</a>:${verse}</td><td class="separator">` + buildVerse( book, chap, verse ) + '</td></tr>';
 					}
 				}
 			}
@@ -115,7 +115,7 @@ function buildVerse ( book, chap, verse ) {
 				//verseText += delim+word;
 				if (word.length>1 || (word!=="." && word!=="," && word!=="?" && word!=="!")) word = delim+word
 				if (langObj.rev[wordId]!==undefined)
-					linkedVerseText += `<a href="#search-view-anchor" onclick="loadSearch('${lang}','${wordId}')">${word}</a>`;
+					linkedVerseText += `<a href="#search" onclick="loadSearch('${lang}','${wordId}')">${word}</a>`;
 				else
 					linkedVerseText += word;
 				delim = ' ';
