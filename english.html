@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Simple Strong's - English - KJV</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" href="styles.css">
+	
+</head>
+<body onload="reloadChapter()">
+
+
+	<div id="top-div" style="height:50px; width:99%;">
+		<p style="margin:16px;color:white;">
+			<a href="chinese.html" style="color:white;">Chinese</a> | 
+			<a href="english.html" style="color:white;">English</a> | 
+			<a href="spanish.html" style="color:white;">Spanish</a>
+		</p>
+	</div>
+
+	<div id="left-div" class="container_div">
+		<a id="bible-view-anchor">
+		<div class="reader_heading">
+			<input id="book-input" value="Gen" style="width:100px;" onchange="loadChapter( document.getElementById('book-input').value, document.getElementById('chap-input').value );">
+			<input id="chap-input" value="1" style="width:45px;" onchange="loadChapter( document.getElementById('book-input').value, document.getElementById('chap-input').value );">
+		</div>
+		<br>
+		<div id="bible-view" class="reader"></div>
+	</div>
+
+	<div id="right-div" class="container_div">
+		<a id="search-view-anchor">
+		<div id="search-heading" class="reader_heading"></div>
+		<br>
+		<div id="search-view" class="reader"></div>
+	</div>
+
+
+
+	<script src="functions.js"></script>
+
+	<script src="compiled-texts/NTGreek-lookup.js"></script>
+	<script src="compiled-texts/OTHebrew-lookup.js"></script>
+	<!--<script src="compiled-texts/Septuagint-lookup.js"></script>-->
+	<script src="compiled-texts/BSBEnglish-strongs-lookup.js"></script>
+</body>
+</html>
