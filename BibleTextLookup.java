@@ -17,21 +17,58 @@ public class BibleTextLookup {
 	    return new String(hexChars);
 	}
 
-	public static List<String> unicodeLetters ( String input ) throws Exception {
+	public static List<String> unicodeLetters ( String input, boolean coreHebrewLetters ) throws Exception {
 		byte[] unicodeBytes = input.getBytes( "UTF-16" );
 		String unicodeHex = bytesToHex( unicodeBytes );
 		List<String> output = new ArrayList<>();
 		
 		for (int i=4; i<unicodeHex.length(); i+=4) {
-			output.add( unicodeHex.substring(i, i+4) );
+			String letter = unicodeHex.substring(i, i+4);
+			if (coreHebrewLetters && !coreHebrewCode(letter)) continue;
+			output.add( letter );
 		}
 		
 		return output;
 	}
+	
+	public static byte nibble ( char c ) {
+		if (c >= '0' && c <= '9') return (byte)(c-0x30);
+		else return (byte)(c-0x37);
+	}
+	
+	public static String unicode ( List<String> codeList ) throws Exception {
+		byte[] unicodeRaw = new byte[ codeList.size()*2 ];
+		int b=0;
+		for (int i=0; i<codeList.size(); i++) {
+			String code = codeList.get(i);
+			byte nib0 = (byte)(nibble(code.charAt(0))<<4);
+			byte nib1 = nibble(code.charAt(1));
+			byte nib2 = (byte)(nibble(code.charAt(2))<<4);
+			byte nib3 = nibble(code.charAt(3));
+			//System.out.println( code+": "+nib0+", "+nib1+", "+nib2+", "+nib3 );
+			unicodeRaw[b]   = (byte)(nib0+nib1);
+			unicodeRaw[b+1] = (byte)(nib2+nib3);
+			b+=2;
+		}
+		return new String( unicodeRaw, "UTF-16" );
+	}
 
-	// CSV columns: bookAbr, chapNum, verseNum, verseText
+	public static boolean coreHebrewCode ( String input ) {
+		byte[] b = input.getBytes();
+		if (b[0]=='0' && b[1]=='5') {
+			if ( b[2]=='D') return true;
+			else if (b[2]=='E' && b[3]>='0' && b[3]<='A') return true;
+		}
+		return false;
+	}
+	
+	// input CSV columns: book, chap, verse, verseText
 
-	// Arguments: <input_CSV> <replacements_CSV> <output_JSON> <regex> <book_order_JSON> <bool_unicode> <min_word_length>
+	// Arguments: <input_CSV> <replacements_CSV> <output_JSON> <regex> <book_order_JSON> <bool_unicode> <min_word_length> <coreHebrew>
+	
+	// takes simple CSV (book,chap,verse,verseText) files and creates JSON tree files:
+	//    text lookup JSON:  verse-->id, id-->verse, id-->word
+	//    word lookup JSON:  word-->id
 
 	public static void main ( String[] args ) throws Exception {
 		// load CSV data
@@ -57,6 +94,10 @@ public class BibleTextLookup {
 		// min word length
 		String minWord = null;
 		if (args.length>6) minWord = args[6];
+
+		// core Hebrew letters
+		boolean coreHebrew = false;
+		if (args.length>7) coreHebrew = Boolean.parseBoolean( args[7] );
 
 		// create giant lexicon lookup table
 		int nextId = 0;
@@ -95,21 +136,36 @@ public class BibleTextLookup {
 			}
 		}
 		
-		// word lookup
+		// word reverse lookup minimum size
 		boolean unicode = true;
 		if (args.length>5) unicode = Boolean.parseBoolean(args[5]);
 		
+		// JSON object to export word reverse lookup
+		Tree words = new JSON( JSON.RETAIN_ORDER );
+		
+		// example: "words": [ [ "05D0", "05D1" ], [ "05D0", "05D1", "05D2" ] ]
 		for (Map.Entry<String,Integer> entry : everyWord.entrySet()) {
-			if (unicode) json.auto( "words" ).auto( entry.getValue().toString() ).add( unicodeLetters(entry.getKey()) );
-			else json.auto( "words" ).add( entry.getValue().toString(), entry.getKey() );
+			String word = entry.getKey();
+			String id = entry.getValue().toString();
+			// id --> word
+			if (unicode) json.auto( "words" ).auto( id ).add( unicodeLetters( word, coreHebrew ) );
+			else json.auto( "words" ).add( id, word );
+			// word --> id
+			words.add( word, id );
 		}
 		
-		// write in specified encoding
+		// export fwd/rev/words lookup JSON in ASCII
 		FileActions.write( args[2], json.serialize(), "US-ASCII" );
+		
+		// export id lookup JSON
+		FileActions.write( FileActions.addSuffix(args[2],"-idlookup"), words.serialize(), "UTF-8", false );
 	}
 
 
 }
+
+
+// parses verse-->id and id--> word in JSON text lookup and produces verse text
 
 class GetVerse {
 
@@ -139,18 +195,34 @@ class GetVerse {
 			delim = " ";
 		}
 		
-		FileActions.write( outputPath, "<html><body>"+verseText+"</body></html>" );	
+		FileActions.write( outputPath, "<html><body>"+verseText+"</body></html>" );
 	}
 
 }
+
+
+// tests unicodeLetters(  ) method
 
 class PrintCodes {
 
 	public static void main ( String[] args ) throws Exception {
-		System.out.println( BibleTextLookup.unicodeLetters( args[0] ) );
+		System.out.println( BibleTextLookup.unicodeLetters( args[0], Boolean.parseBoolean(args[1]) ) );
 	}
 
 }
+
+// tests unicode(  ) method
+
+class PrintUnicode {
+
+	public static void main ( String[] args ) throws Exception {
+		System.out.println( BibleTextLookup.unicode( Arrays.asList( args ) ) );
+	}
+
+}
+
+
+// parses bsb_tables.csv (exported from bsb_tables.xlsx) and produces individual simple (book,chap,verse,verseText) CSV files
 
 class EnglishStrongsFromBSBTables {
 
@@ -220,7 +292,7 @@ class EnglishStrongsFromBSBTables {
 			if (!strongs.equals("")) {
 				String lang = row.get( keyMap.get("Language") );
 				if (lang.length()<1) throw new Exception( "error parsing verse reference on line "+i+":\n"+row );
-				firstLetter = lang.substring(0,1);
+				firstLetter = ( lang.equals("Greek") ? "G" : "H" );
 				strongsSB.append(" ").append(firstLetter).append( strongs );
 			}
 			
@@ -237,4 +309,128 @@ class EnglishStrongsFromBSBTables {
 	}
 	
 }
+
+// produce lang-->word-->id
+// <output_file> <he> <OTHebrew-lookup-words.json> <gr> <NTGreek...something> <en> <BSBEnglish...> <st> <Strongs...>
+
+class CompileIdLookups {
+	public static void main ( String[] args ) throws Exception {
+	
+		Tree wordLookup = new JSON();
+	
+		for (int i=1; i<args.length; i+=2) {
+			wordLookup.add(
+				args[i],
+				new JSON( FileActions.read( args[i+1] ) )
+			);
+		}
+		
+		FileActions.write( args[0], wordLookup.serialize(), "UTF-8" );
+	}
+	
+}
+
+
+// produce lang-->id-->otherLang-->[ otherId0, otherId1 ]
+// <word_lookup_JSON> <bsb_tables_CSV>
+
+class TranslateFromBSBTables {
+	private static int notFound;
+	private static int found;
+
+	public static String id ( Tree lookup, String lang, String word ) {
+		Tree langObj = lookup.get(lang);
+		if (langObj==null) {
+			System.out.println( "Can't find lang "+lang );
+			return null;
+		}
+		Tree id = langObj.get(word);
+		//System.out.println( langObj.serialize() );
+		//if (true) throw new RuntimeException( "stopped" );
+		if (id==null) {
+			System.out.println( (notFound++)+": Can't find word "+word+" in lang "+lang );
+			return null;
+		} else {
+			found++;
+		}
+		return id.value();
+	}
+	
+	
+	
+	public static void main ( String[] args ) throws Exception {
+	
+		Tree wordLookup = new JSON( FileActions.read(args[0]) );
+	
+		LookupTable bsbTables = new LookupTable( new CSV( FileActions.read(args[1]) ) );
+		List<String> keyRow = bsbTables.data().get(1);
+		Map<String,Integer> keyMap = bsbTables.rowLookup(1);
+		
+		Tree translationLookup = new JSON( JSON.RETAIN_ORDER );
+		Tree translationLookupUnicode = new JSON( JSON.RETAIN_ORDER );
+		
+		for (List<String> row : bsbTables.data()) {
+			String lang = row.get( keyMap.get("Language") );
+			String langWord = row.get( keyMap.get("WLC / Nestle Base {TR} ⧼RP⧽ (WH) 〈NE〉 [NA] ‹SBL› [[ECM]]") );
+			String strongsPrefix;
+
+			if (lang.equals("Greek")) {
+				lang = "gr";
+				strongsPrefix = "G";
+			} else { // including both Hebrew and Aramaic
+				langWord = BibleTextLookup.unicode( BibleTextLookup.unicodeLetters( langWord, true ) );
+				lang = "he";
+				strongsPrefix = "H";
+			}
+			
+			Set<String> engSet = new HashSet<>( Regex.groups(
+				row.get( keyMap.get("BSB Version") ),
+				"(\\w{4,})"
+			));
+			String strongs = strongsPrefix+row.get( keyMap.get("Strongs") );
+			
+			for (String engWord : engSet) {
+				String enId = id( wordLookup, "en", engWord );
+				String langId = id( wordLookup, lang, langWord );
+				String strongsId = id( wordLookup, "st", strongs );
+				
+				if (enId!=null && langId!=null && strongsId!=null) {
+					translationLookup.auto( "en" ).auto( enId ).auto( lang ).auto( langId );
+					translationLookup.auto( "en" ).auto( enId ).auto( "st" ).auto( strongsId );
+					
+					translationLookup.auto( lang ).auto( langId ).auto( "en" ).auto( enId );
+					translationLookup.auto( lang ).auto( langId ).auto( "st" ).auto( strongsId );
+					
+					translationLookup.auto( "st" ).auto( strongsId ).auto( lang ).auto( langId );
+					translationLookup.auto( "st" ).auto( strongsId ).auto( "en" ).auto( enId );
+
+					translationLookupUnicode.auto( "en" ).auto( engWord ).auto( lang ).auto( langWord );
+					translationLookupUnicode.auto( "en" ).auto( engWord ).auto( "st" ).auto( strongs );
+					
+					translationLookupUnicode.auto( lang ).auto( langWord ).auto( "en" ).auto( engWord );
+					translationLookupUnicode.auto( lang ).auto( langWord ).auto( "st" ).auto( strongs );
+					
+					translationLookupUnicode.auto( "st" ).auto( strongs ).auto( lang ).auto( langWord );
+					translationLookupUnicode.auto( "st" ).auto( strongs ).auto( "en" ).auto( engWord );
+				}
+			}
+		}
+		
+		// convert reverse 'key:nulls's into array
+		for (Tree lang0 : translationLookup.branches()) {
+			for (Tree id0 : lang0.branches()) {
+				for (Tree lang1 : id0.branches()) {
+					Set<String> ids = lang1.keys(); // copy the key set
+					lang1.map( new LinkedHashMap<>() ); // clear the map
+					for (String id : ids) lang1.add( id ); // each id now becomes an array value
+				}
+			}
+		}
+		
+		FileActions.write( FileActions.name(args[0])+"-translate.json", translationLookup.serialize(), "US-ASCII" );
+		FileActions.write( FileActions.name(args[0])+"-translate-unicode.json", translationLookupUnicode.serialize(), "UTF-8" );
+		System.out.println( "found: "+found );
+	}
+}
+
 
