@@ -348,7 +348,8 @@ class TranslateFromBSBTables {
 		//System.out.println( langObj.serialize() );
 		//if (true) throw new RuntimeException( "stopped" );
 		if (id==null) {
-			System.out.println( (notFound++)+": Can't find word "+word+" in lang "+lang );
+			//System.out.println( (notFound)+": Can't find word "+word+" in lang "+lang );
+			notFound++;
 			return null;
 		} else {
 			found++;
@@ -368,6 +369,8 @@ class TranslateFromBSBTables {
 		
 		Tree translationLookup = new JSON( JSON.RETAIN_ORDER );
 		Tree translationLookupUnicode = new JSON( JSON.RETAIN_ORDER );
+		
+		Set<String> notFoundSet = new TreeSet<>();
 		
 		for (List<String> row : bsbTables.data()) {
 			String lang = row.get( keyMap.get("Language") );
@@ -412,6 +415,10 @@ class TranslateFromBSBTables {
 					
 					translationLookupUnicode.auto( "st" ).auto( strongs ).auto( lang ).auto( langWord );
 					translationLookupUnicode.auto( "st" ).auto( strongs ).auto( "en" ).auto( engWord );
+				} else {
+					if (enId==null) notFoundSet.add( engWord );
+					if (langId==null) notFoundSet.add( langWord );
+					if (strongsId==null) notFoundSet.add( strongs );
 				}
 			}
 		}
@@ -429,6 +436,8 @@ class TranslateFromBSBTables {
 		
 		FileActions.write( FileActions.name(args[0])+"-translate.json", translationLookup.serialize(), "US-ASCII" );
 		FileActions.write( FileActions.name(args[0])+"-translate-unicode.json", translationLookupUnicode.serialize(), "UTF-8" );
+		System.out.println( notFoundSet );
+		System.out.println( "not found: "+notFound );
 		System.out.println( "found: "+found );
 	}
 }

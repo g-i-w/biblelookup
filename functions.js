@@ -1,5 +1,6 @@
 
 var bible = {};
+var translation;
 
 var globalWordId = {};
 
@@ -42,15 +43,29 @@ function reloadChapter () {
 	loadChapter( document.getElementById("book-input").value, document.getElementById("chap-input").value );
 }
 
+function loadTranslation ( lang, id ) {
+	globalWordId = {};
+	globalWordId[lang] = [];
+	globalWordId[lang].push( id );
+	console.log("translation:", (translation!==undefined) );
+	if (translation[lang]!==undefined) console.log( translation[lang][id] );
+	if (translation[lang]!==undefined && translation[lang][id]!==undefined) {
+		for (const [otherLang, otherLangObj] of Object.entries(translation[lang][id])) {
+			for (i in otherLangObj) {
+				if (globalWordId[otherLang]==undefined) globalWordId[otherLang] = [];
+				globalWordId[otherLang].push( otherLangObj[i] );
+			}
+		}
+	}
+	console.log( "globalWordId:", globalWordId );
+}
+
 function loadSearch ( lang, id ) {
 	console.log( `loadSearch: ${lang} ${id}` );
 	var table = "<table>";
 	if (bible[lang]!==undefined && bible[lang].words[id]!==undefined) {
 		var word = buildWord( lang, id );
-		globalWordId = {};
-		globalWordId[lang] = [];
-		globalWordId[lang].push( id );
-		console.log( "writing to globalWordId", globalWordId );
+		loadTranslation( lang, id );
 		if (bible[lang].rev[id]!==undefined) {
 			for (const [book, bookObj] of Object.entries(bible[lang].rev[id])) {
 				for (const [chap, verseObj] of Object.entries(bookObj)) {
@@ -80,7 +95,7 @@ function buildWord ( lang, id ) {
 	var word = '';
 	if (bible[lang]!==undefined && bible[lang].words[id]!==undefined) {
 		var letters = bible[lang].words[id];
-		console.log( id, letters );
+		//console.log( id, letters );
 		if(Array.isArray(letters)) {
 			for (i in letters) {
 				word += '&#x'+letters[i]+';';
@@ -99,7 +114,7 @@ function buildVerse ( book, chap, verse ) {
 	var linkedVerseText = '';
 	var delim = '';
 	for (const [lang, langObj] of Object.entries(bible)) {
-		console.log( `lang:${lang}, book:${book}, chap:${chap}, verse:${verse}` );
+		//console.log( `lang:${lang}, book:${book}, chap:${chap}, verse:${verse}` );
 		if (langObj.fwd[book]!==undefined && langObj.fwd[book][chap]!==undefined && langObj.fwd[book][chap][verse]!==undefined) {
 			var verseArray = langObj.fwd[book][chap][verse];
 			//console.log( verseArray );
