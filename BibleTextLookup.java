@@ -111,6 +111,7 @@ public class BibleTextLookup {
 			String verseText = row.get(3);
 			List<String> words = Regex.groups( verseText, args[3] );
 			for (String word : words) {
+				if (word==null || word.equals("")) continue;
 				if (! everyWord.containsKey(word)) everyWord.put( word, nextId++ ); // if it's a new word, register and increment id
 				Integer id = everyWord.get( word ); // get the id for this word
 				String idStr = id.toString();
@@ -357,6 +358,17 @@ class TranslateFromBSBTables {
 		return id.value();
 	}
 	
+	public static void link ( Tree tree, String lang, String langWord, String engWord, String strongsWord ) {
+		tree.auto( "en" ).auto( engWord ).auto( lang ).auto( langWord );
+		tree.auto( "en" ).auto( engWord ).auto( "st" ).auto( strongsWord );
+		
+		tree.auto( lang ).auto( langWord ).auto( "en" ).auto( engWord );
+		tree.auto( lang ).auto( langWord ).auto( "st" ).auto( strongsWord );
+		
+		tree.auto( "st" ).auto( strongsWord ).auto( lang ).auto( langWord );
+		tree.auto( "st" ).auto( strongsWord ).auto( "en" ).auto( engWord );
+	}
+	
 	
 	
 	public static void main ( String[] args ) throws Exception {
@@ -380,6 +392,8 @@ class TranslateFromBSBTables {
 			if (lang.equals("Greek")) {
 				lang = "gr";
 				strongsPrefix = "G";
+				List<String> regex = Regex.groups( langWord, "([^\\s«»·:;,\\-…\\(\\)\\.‹›〈〉⧼⧽*]+)" );
+				if (regex.size()>0) langWord = regex.get(0);
 			} else { // including both Hebrew and Aramaic
 				langWord = BibleTextLookup.unicode( BibleTextLookup.unicodeLetters( langWord, true ) );
 				lang = "he";
@@ -398,23 +412,8 @@ class TranslateFromBSBTables {
 				String strongsId = id( wordLookup, "st", strongs );
 				
 				if (enId!=null && langId!=null && strongsId!=null) {
-					translationLookup.auto( "en" ).auto( enId ).auto( lang ).auto( langId );
-					translationLookup.auto( "en" ).auto( enId ).auto( "st" ).auto( strongsId );
-					
-					translationLookup.auto( lang ).auto( langId ).auto( "en" ).auto( enId );
-					translationLookup.auto( lang ).auto( langId ).auto( "st" ).auto( strongsId );
-					
-					translationLookup.auto( "st" ).auto( strongsId ).auto( lang ).auto( langId );
-					translationLookup.auto( "st" ).auto( strongsId ).auto( "en" ).auto( enId );
-
-					translationLookupUnicode.auto( "en" ).auto( engWord ).auto( lang ).auto( langWord );
-					translationLookupUnicode.auto( "en" ).auto( engWord ).auto( "st" ).auto( strongs );
-					
-					translationLookupUnicode.auto( lang ).auto( langWord ).auto( "en" ).auto( engWord );
-					translationLookupUnicode.auto( lang ).auto( langWord ).auto( "st" ).auto( strongs );
-					
-					translationLookupUnicode.auto( "st" ).auto( strongs ).auto( lang ).auto( langWord );
-					translationLookupUnicode.auto( "st" ).auto( strongs ).auto( "en" ).auto( engWord );
+					link( translationLookup, lang, langId, enId, strongsId );
+					link( translationLookupUnicode, lang, langWord, engWord, strongs );
 				} else {
 					if (enId==null) notFoundSet.add( engWord );
 					if (langId==null) notFoundSet.add( langWord );

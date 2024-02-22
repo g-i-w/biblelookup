@@ -1,0 +1,9 @@
+- trace down why part of Rev 4:11 (possibly others) are missing
+- reference hyphenated hebrew to both sub words
+- (not sure whether this is actually an issue) strip punctuation off greek words
+- build strongs-->[english words] and strongs-->[strongs] using:
+	- SwordProject
+	- studybible.info
+- septuagint version
+- info link/box with background & help
+

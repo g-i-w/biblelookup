@@ -9,15 +9,15 @@
 </head>
 <body onload="reloadChapter()">
 
+	<a id="chapter"></a>
 
 	<div id="top-div" style="height:50px; width:99%;">
 		<p style="margin:16px;color:white;">Bible Text Lookup Tool</p>
 	</div>
 
 	<div id="left-div" class="container_div">
-		<a id="chapter"></a>
 		<div class="reader_heading">
-			<select id="book-input" onchange="loadChapter( document.getElementById('book-input').value, document.getElementById('chap-input').value );"> 
+			<select id="book-input" onchange="loadChapter( document.getElementById('book-input').value, 1 );"> 
 				<option value="Gen">Genesis</option>
 				<option value="Exo">Exodus</option>
 				<option value="Lev">Leviticus</option>
