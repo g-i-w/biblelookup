@@ -15,17 +15,87 @@
 	</div>
 
 	<div id="left-div" class="container_div">
-		<a id="chapter">
+		<a id="chapter"></a>
 		<div class="reader_heading">
-			<input id="book-input" value="Gen" style="width:100px;" onchange="loadChapter( document.getElementById('book-input').value, document.getElementById('chap-input').value );">
+			<select id="book-input" onchange="loadChapter( document.getElementById('book-input').value, document.getElementById('chap-input').value );"> 
+				<option value="Gen">Genesis</option>
+				<option value="Exo">Exodus</option>
+				<option value="Lev">Leviticus</option>
+				<option value="Num">Numbers</option>
+				<option value="Deu">Deuteronomy</option>
+				<option value="Jos">Joshua</option>
+				<option value="Jdg">Judges</option>
+				<option value="Rth">Ruth</option>
+				<option value="1Sa">1 Samuel</option>
+				<option value="2Sa">2 Samuel</option>
+				<option value="1Ki">1 Kings</option>
+				<option value="2Ki">2 Kings</option>
+				<option value="1Ch">1 Chronicles</option>
+				<option value="2Ch">2 Chronicles</option>
+				<option value="Ezr">Ezra</option>
+				<option value="Neh">Nehemiah</option>
+				<option value="Est">Esther</option>
+				<option value="Job">Job</option>
+				<option value="Psa">Psalms</option>
+				<option value="Pro">Proverbs</option>
+				<option value="Ecc">Ecclesiastes</option>
+				<option value="of">Song</option>
+				<option value="Isa">Isaiah</option>
+				<option value="Jer">Jeremiah</option>
+				<option value="Lam">Lamentations</option>
+				<option value="Eze">Ezekiel</option>
+				<option value="Dan">Daniel</option>
+				<option value="Hos">Hosea</option>
+				<option value="Joe">Joel</option>
+				<option value="Amo">Amos</option>
+				<option value="Oba">Obadiah</option>
+				<option value="Jon">Jonah</option>
+				<option value="Mic">Micah</option>
+				<option value="Nah">Nahum</option>
+				<option value="Hab">Habakkuk</option>
+				<option value="Zep">Zephaniah</option>
+				<option value="Hag">Haggai</option>
+				<option value="Zec">Zechariah</option>
+				<option value="Mal">Malachi</option>
+				<option value="Mat">Matthew</option>
+				<option value="Mar">Mark</option>
+				<option value="Luk">Luke</option>
+				<option value="Jhn">John</option>
+				<option value="Act">Acts</option>
+				<option value="Rom">Romans</option>
+				<option value="1Co">1Corinthians</option>
+				<option value="2Co">2Corinthians</option>
+				<option value="Gal">Galatians</option>
+				<option value="Eph">Ephesians</option>
+				<option value="Phl">Philippians</option>
+				<option value="Col">Colossians</option>
+				<option value="1Th">1 Thessalonians</option>
+				<option value="2Th">2 Thessalonians</option>
+				<option value="1Ti">1 Timothy</option>
+				<option value="2Ti">2 Timothy</option>
+				<option value="Tit">Titus</option>
+				<option value="Phm">Philemon</option>
+				<option value="Heb">Hebrews</option>
+				<option value="Jas">James</option>
+				<option value="1Pe">1 Peter</option>
+				<option value="2Pe">2 Peter</option>
+				<option value="1Jo">1 John</option>
+				<option value="2Jo">2 John</option>
+				<option value="3Jo">3 John</option>
+				<option value="Jde">Jude</option>
+				<option value="Rev">Revelation</option>
+			</select>
+			<!--<input id="book-input" value="Gen" style="width:100px;" onchange="loadChapter( document.getElementById('book-input').value, document.getElementById('chap-input').value );">-->
+			<a href="#chapter" style="color:lightgray;" onclick="nextChapter(-1);">&#x25C0;</a>
 			<input id="chap-input" value="1" style="width:45px;" onchange="loadChapter( document.getElementById('book-input').value, document.getElementById('chap-input').value );">
+			<a href="#chapter" style="color:lightgray;" onclick="nextChapter(1);">&#x25B6;</a>
 		</div>
 		<br>
 		<div id="bible-view" class="reader"></div>
 	</div>
 
 	<div id="right-div" class="container_div">
-		<a id="search">
+		<a id="search"></a>
 		<div id="search-heading" class="reader_heading"></div>
 		<br>
 		<div id="search-view" class="reader"></div>

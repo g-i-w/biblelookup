@@ -30,6 +30,7 @@ function loadChapter ( book, chap ) {
 				//verseText = verseText.replace( new RegExp("(\\w+)","mg"),"<a href=\"#\" onclick=\"loadWord('$1')\">$1</a>");
 				table += `<tr><td>${verse}</td><td>` + buildVerse( book, chap, verse ) + '</td></tr>';
 			}
+			break;
 		}
 	}
 	table += "</table>";
@@ -41,6 +42,10 @@ function loadChapter ( book, chap ) {
 
 function reloadChapter () {
 	loadChapter( document.getElementById("book-input").value, document.getElementById("chap-input").value );
+}
+
+function nextChapter ( delta ) {
+	loadChapter( document.getElementById("book-input").value, Number(document.getElementById("chap-input").value)+Number(delta) );
 }
 
 function loadTranslation ( lang, id ) {
