@@ -104,7 +104,7 @@ public class BibleTextLookup {
 		int rowCount = 0;
 		Map<String,Integer> everyWord = new LinkedHashMap<>();
 		for (List<String> row : orderedInput.data()) {
-			if (row.size()>4) throw new RuntimeException( "More items in line "+rowCount+" than there should be!" );
+			//if (row.size()>4) throw new RuntimeException( "More items in line "+rowCount+" than there should be!" );
 			String book = row.get(0);
 			String chap = row.get(1);
 			String verse = row.get(2);

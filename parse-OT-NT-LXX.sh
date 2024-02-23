@@ -11,9 +11,9 @@ cat biblelookup/compiled-texts/OTHebrew-lookup.json >> biblelookup/compiled-text
 
 # New Testament (Greek)
 rm biblelookup/compiled-texts/NTGreek*
-java creek.ExecRegexBlobCSV biblelookup/ebible.org/grctr biblelookup/compiled-texts/NTGreek.csv ">(\d+)&#160;</span>([^<]+)\s+<" "(\w{3})0*(\d+)\.htm"
+java creek.ExecRegexBlobCSV biblelookup/ebible.org/grctr biblelookup/compiled-texts/NTGreek.csv "(\\d+)&#160;(.+?)(ul|id=\"V\\d+\")" "(\w{3})0*(\d+)\.htm"
 java biblelookup.CSVtoJSON biblelookup/compiled-texts/NTGreek.csv biblelookup/books.csv biblelookup/compiled-texts/NTGreek-utf8.js "UTF-8"
-java biblelookup.BibleTextLookup biblelookup/compiled-texts/NTGreek.csv biblelookup/books.csv biblelookup/compiled-texts/NTGreek-lookup.json "([^\\s«»·:;,\\-…\\(\\)\\.‹›〈〉⧼⧽*]+)" biblelookup/book-order.json
+java biblelookup.BibleTextLookup biblelookup/compiled-texts/NTGreek.csv biblelookup/books.csv biblelookup/compiled-texts/NTGreek-lookup.json "([^†‡/¦\\s«»·:;,\\-…\\(\\)\\.‹›〈〉⧼⧽*<>a-z0-9A-Z'=\"&#;]+)" biblelookup/book-order.json
 echo "bible.gr = " > biblelookup/compiled-texts/NTGreek-lookup.js
 cat biblelookup/compiled-texts/NTGreek-lookup.json >> biblelookup/compiled-texts/NTGreek-lookup.js
 
