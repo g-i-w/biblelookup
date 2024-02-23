@@ -111,7 +111,7 @@ public class BibleTextLookup {
 			String verseText = row.get(3);
 			List<String> words = Regex.groups( verseText, args[3] );
 			for (String word : words) {
-				if (word==null || word.equals("")) continue;
+				if (word==null || word.equals("") || word.equals("vvv")) continue;
 				if (! everyWord.containsKey(word)) everyWord.put( word, nextId++ ); // if it's a new word, register and increment id
 				Integer id = everyWord.get( word ); // get the id for this word
 				String idStr = id.toString();

@@ -10,7 +10,7 @@ cat biblelookup/openbible.org/bsb_tables.1.csv biblelookup/openbible.org/bsb_tab
 java biblelookup.EnglishStrongsFromBSBTables biblelookup/openbible.org/bsb_tables.csv biblelookup/compiled-texts/BSBEnglish.csv biblelookup/compiled-texts/Strongs.csv
 
 # BSB
-java biblelookup.BibleTextLookup biblelookup/compiled-texts/BSBEnglish.csv biblelookup/books.csv biblelookup/compiled-texts/BSBEnglish-lookup.json "(\\S+)" biblelookup/book-order.json false "\\w{5,}"
+java biblelookup.BibleTextLookup biblelookup/compiled-texts/BSBEnglish.csv biblelookup/books.csv biblelookup/compiled-texts/BSBEnglish-lookup.json "(\\w+)" biblelookup/book-order.json false "\\w{5,}"
 echo "bible.en = " > biblelookup/compiled-texts/BSBEnglish-lookup.js
 cat biblelookup/compiled-texts/BSBEnglish-lookup.json >> biblelookup/compiled-texts/BSBEnglish-lookup.js
 
