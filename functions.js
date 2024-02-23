@@ -129,7 +129,7 @@ function buildVerse ( book, chap, verse ) {
 				var word = buildWord( lang, wordId );
 				if (globalWordId[lang]!==undefined) {
 					for (i in globalWordId[lang]) {
-						if (wordId==globalWordId[lang][i]) word = "<b>"+word+"</b>";
+						if (wordId==globalWordId[lang][i]) word = "<span style=\"background-color:rgb(230,242,255);\"><b>"+word+"</b></span>";
 					}
 				}
 				//verseText += delim+word;
